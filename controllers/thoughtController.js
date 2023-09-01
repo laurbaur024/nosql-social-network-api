@@ -58,17 +58,37 @@ module.exports = {
       if (!thought) {
         res.status(404).json({ message: 'No thought with that ID' });
       }
-      res.json({ message: 'thought deleted!' });
+      res.json({ message: 'Thought deleted!' });
     } catch (err) {
       res.status(500).json(err);
     }
   },
   
   async addReaction (req,res) {
-    
+    Thought.findOneAndUpdate(
+      {_id: req.params.thoughtId},
+      {$push: {reactions: req.body}},
+      {new:true, runValidators: true}
+    )
+    .then(thoughtData => {
+      if (!thoughtData) {
+        res.status(404).json({ message: 'No thought with that ID.'})
+      }
+      res.json({ message: 'Reaction added to thought.'})
+    })
   },
   
   async deleteReaction (req,res) {
-    
+    Thought.findOneAndDelete(
+      {_id: req.params.thoughtId},
+      {$pull: {reactions: {reactionId: req.params.reactionId}}},
+      {new:true, runValidators: true}
+    )
+    .then(thoughtData => {
+      if (!thoughtData) {
+        res.status(404).json({ message: 'No thought/reaction found with that ID.'})
+      }
+      res.json({ message: 'Reaction deleted!'})
+    })
   },
 }
