@@ -1,4 +1,4 @@
-const { User, Thought } = require('../models');
+const { User } = require('../models');
 
 
 module.exports = {
@@ -64,10 +64,30 @@ module.exports = {
   },
   
   async addFriend (req,res) {
-    
+    User.findOneAndUpdate(
+      {_id: req.params.userId},
+      {$push: {friends: req.params.friendId}},
+      {new:true, runValidators: true}
+    )
+    .then(userData => {
+      if (!userData) {
+        res.status(404).json({ message: 'No user with that ID!'})
+      }
+      res.json({ message: 'Friend added!'})
+    })
   },
 
   async deleteFriend (req,res) {
-    
+    User.findOneAndDelete(
+      {_id: req.params.userId},
+      {$pull: {friends: {friendId: req.params.friendId}}},
+      {new:true, runValidators: true}
+    )
+    .then(userData => {
+      if (!userData) {
+        res.status(404).json({ message: 'No friend with that ID.'})
+      }
+      res.json({ message: 'Friend Deleted!'})
+    })
   },
 }
